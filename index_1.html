@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Chart Generator</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom"></script>
+  <style>
+    canvas {
+      max-width: 100%;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+    }
+
+    .header h1 {
+      font-size: 40px;
+      margin-right: 30px;
+    }
+
+    .header img {
+      max-width:40px;
+      height: auto;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>Chart Generator</h1>
+    <img src="./img_icons/icons8-chart-50.png" alt="Chart Generator Logo">
+  </div>
+ 
+
+  <div>
+    
+    <input type="file" id="dataFileInput" accept=".csv, .xlsx">
+    <hr>
+    <div>
+      <label for="chartTypeSelect">Chart Type:</label>
+      <select id="chartTypeSelect">
+        <option value="line">Line Chart</option>
+        <option value="bar">Bar Chart</option>
+        <option value="scatter">Scatter Plot</option>
+        <option value="bubble">Bubble Chart</option>
+      </select>
+    </div>
+    <div>
+      <label for="dependentSelect">Dependent Variables:</label>
+      <select id="dependentSelect" multiple></select>
+    </div>
+    <div>
+      <label for="independentSelect">Independent Variable:</label>
+      <select id="independentSelect"></select>
+    </div>
+    <div>
+      <label for="chartTitleInput">Chart Title:</label>
+      <input type="text" id="chartTitleInput">
+    </div>
+    <div>
+      <label for="xAxisLabelInput">X-Axis Label:</label>
+      <input type="text" id="xAxisLabelInput">
+    </div>
+    <div>
+      <label for="yAxisLabelInput">Y-Axis Label:</label>
+      <input type="text" id="yAxisLabelInput">
+    </div>
+    <div>
+      <label for="lineThicknessInput">Line Thickness:</label>
+      <input type="number" id="lineThicknessInput" value="1" min="0">
+    </div>
+    <div>
+      <label for="dotSizeInput">Dot Size:</label>
+      <input type="number" id="dotSizeInput" value="3" min="0">
+    </div>
+    <div id="colorInputsContainer">
+      <!-- Dynamically generated color input fields will be placed here -->
+    </div>
+    <div>
+      <label for="animationCheckbox">Enable Animation:</label>
+      <input type="checkbox" id="animationCheckbox">
+    </div>
+    <hr>
+    <button id="generateChartBtn">Generate Chart</button>
+    <div>
+      <label for="formatSelect">Save Format:</label>
+      <select id="formatSelect">
+        <option value="png">PNG</option>
+        <option value="jpeg">JPEG</option>
+        <option value="svg">SVG</option>
+      </select>
+    </div>
+    <button id="saveChartBtn">Save Chart</button>
+  </div>
+  <div>
+    <canvas id="chartCanvas"></canvas>
+  </div>
+  
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const chartCanvas = document.getElementById('chartCanvas');
+      let chart = null;
+      let data = null;
+
+      function createChart(labels, datasets, chartType, chartTitle, xAxisLabel, yAxisLabel, lineThickness, dotSize, enableAnimation) {
+        const ctx = chartCanvas.getContext('2d');
+
+        if (chart !== null) {
+          chart.destroy(); // Destroy the previous chart if it exists
+        }
+
+        const chartData = {
+          labels: labels,
+          datasets: datasets
+        };
+
+        const chartOptions = {
+          responsive: true,
+          scales: {
+            x: {
+              display: true,
+              title: {
+                display: true,
+                text: xAxisLabel || ''
+              },
+              ticks: {
+                beginAtZero: true
+              },
+              plugins: {
+                zoom: {
+                  pan: {
+                    enabled: true,
+                    mode: 'x'
+                  },
+                  zoom: {
+                    wheel: {
+                      enabled: true,
+                    },
+                    pinch: {
+                      enabled: true
+                    },
+                    mode: 'x'
+                  }
+                }
+              }
+            },
+            y: {
+              display: true,
+              title: {
+                display: true,
+                text: yAxisLabel || ''
+              },
+              ticks: {
+                beginAtZero: true
+              },
+              plugins: {
+                zoom: {
+                  pan: {
+                    enabled: true,
+                    mode: 'y'
+                  },
+                  zoom: {
+                    wheel: {
+                      enabled: true,
+                    },
+                    pinch: {
+                      enabled: true
+                    },
+                    mode: 'y'
+                  }
+                }
+              }
+            }
+          },
+          plugins: {
+            title: {
+              display: true,
+              text: chartTitle
+            },
+            legend: {
+              display: true,
+              labels: {
+                usePointStyle: true
+              }
+            },
+            zoom: {
+              pan: {
+                enabled: true,
+                mode: 'xy'
+              },
+              zoom: {
+                wheel: {
+                  enabled: true,
+                },
+                pinch: {
+                  enabled: true
+                },
+                mode: 'xy'
+              }
+            }
+          }
+        };
+
+        if (enableAnimation) {
+          chartOptions.animation = {
+            duration: 1000,
+            easing: 'easeInOutQuart'
+          };
+        }
+
+        if (chartType === 'line') {
+          chartOptions.elements = {
+            line: {
+              borderWidth: lineThickness
+            },
+            point: {
+              radius: dotSize,
+              backgroundColor: 'transparent',
+              borderWidth: lineThickness,
+              hoverRadius: dotSize + 2,
+              hoverBorderWidth: lineThickness + 1
+            }
+          };
+        } else if (chartType === 'bar') {
+          chartOptions.indexAxis = 'y';
+          chartOptions.elements = {
+            bar: {
+              borderWidth: lineThickness
+            }
+          };
+        } else if (chartType === 'scatter' || chartType === 'bubble') {
+          chartOptions.elements = {
+            point: {
+              radius: dotSize,
+              borderWidth: lineThickness,
+              hoverRadius: dotSize + 2,
+              hoverBorderWidth: lineThickness + 1
+            }
+          };
+        }
+
+        chart = new Chart(ctx, {
+          type: chartType,
+          data: chartData,
+          options: chartOptions
+        });
+      }
+
+      function handleFileLoad(event) {
+        const file = event.target.files[0];
+        const reader = new FileReader();
+
+        reader.onload = function(e) {
+          const contents = e.target.result;
+          const extension = file.name.split('.').pop().toLowerCase();
+
+          if (extension === 'csv') {
+            data = Papa.parse(contents, { header: true }).data;
+          } else if (extension === 'xlsx') {
+            // Process the XLSX file and extract data
+            // You will need to use a library like 'xlsx' or 'xlsx-populate' to handle XLSX files
+            // Example: https://github.com/SheetJS/sheetjs
+            // Once the data is extracted, assign it to the 'data' variable
+          }
+
+          const columns = Object.keys(data[0]);
+          const dependentSelect = document.getElementById('dependentSelect');
+          const independentSelect = document.getElementById('independentSelect');
+          const colorInputsContainer = document.getElementById('colorInputsContainer');
+
+          dependentSelect.innerHTML = '';
+          independentSelect.innerHTML = '';
+          colorInputsContainer.innerHTML = '';
+
+          for (const column of columns) {
+            const option = document.createElement('option');
+            option.value = column;
+            option.text = column;
+            dependentSelect.add(option.cloneNode(true));
+            independentSelect.add(option);
+
+            const colorInput = document.createElement('input');
+            colorInput.type = 'color';
+            colorInput.id = column + 'ColorInput';
+            colorInput.value = getRandomColor();
+            colorInputsContainer.appendChild(colorInput);
+          }
+        };
+
+        reader.readAsText(file);
+      }
+
+      function getRandomColor() {
+        const letters = '0123456789ABCDEF';
+        let color = '#';
+        for (let i = 0; i < 6; i++) {
+          color += letters[Math.floor(Math.random() * 16)];
+        }
+        return color;
+      }
+
+      function generateChart() {
+        const chartTypeSelect = document.getElementById('chartTypeSelect');
+        const dependentSelect = document.getElementById('dependentSelect');
+        const independentSelect = document.getElementById('independentSelect');
+        const chartTitleInput = document.getElementById('chartTitleInput');
+        const xAxisLabelInput = document.getElementById('xAxisLabelInput');
+        const yAxisLabelInput = document.getElementById('yAxisLabelInput');
+        const lineThicknessInput = document.getElementById('lineThicknessInput');
+        const dotSizeInput = document.getElementById('dotSizeInput');
+        const animationCheckbox = document.getElementById('animationCheckbox');
+
+        const chartType = chartTypeSelect.value;
+        const dependentVariables = Array.from(dependentSelect.selectedOptions, option => option.value);
+        const independentVariable = independentSelect.value;
+        const chartTitle = chartTitleInput.value;
+        const xAxisLabel = xAxisLabelInput.value;
+        const yAxisLabel = yAxisLabelInput.value;
+        const lineThickness = parseInt(lineThicknessInput.value);
+        const dotSize = parseInt(dotSizeInput.value);
+        const enableAnimation = animationCheckbox.checked;
+
+        const labels = data.map(row => row[independentVariable]);
+        const datasets = dependentVariables.map(variable => ({
+          label: variable,
+          data: data.map(row => row[variable]),
+          backgroundColor: document.getElementById(variable + 'ColorInput').value,
+          borderColor: document.getElementById(variable + 'ColorInput').value,
+          fill: false
+        }));
+
+        createChart(labels, datasets, chartType, chartTitle, xAxisLabel, yAxisLabel, lineThickness, dotSize, enableAnimation);
+      }
+
+    function saveChart() {
+      const dataURL = chartCanvas.toDataURL(); // Get the chart image as base64 data URL
+      const formatSelect = document.getElementById('formatSelect');
+      const selectedFormat = formatSelect.value;
+
+      let ext = 'png';
+      let mimeType = 'image/png';
+
+      if (selectedFormat === 'jpeg') {
+        ext = 'jpg';
+        mimeType = 'image/jpeg';
+
+      } else if (selectedFormat === 'svg') {
+        ext = 'svg';
+        mimeType = 'image/svg+xml';
+      }
+
+      const link = document.createElement('a');
+      link.href = dataURL;
+      link.download = 'chart.' + ext;
+      link.type = mimeType;
+      link.click();
+    }
+  
+
+      const dataFileInput = document.getElementById('dataFileInput');
+      const generateChartBtn = document.getElementById('generateChartBtn');
+      const saveChartBtn = document.getElementById('saveChartBtn');
+
+      dataFileInput.addEventListener('change', handleFileLoad);
+      generateChartBtn.addEventListener('click', generateChart);
+      saveChartBtn.addEventListener('click', saveChart);
+    });
+  </script>
+</body>
+</html>

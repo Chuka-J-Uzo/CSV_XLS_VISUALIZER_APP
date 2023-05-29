@@ -18,7 +18,7 @@ Chart Generator is a web application that allows you to generate interactive cha
 - Save the generated chart as PNG, JPEG, or SVG format.
 
 ![Plotted_Chart](./img_assets/Plotted_chart_sample.png "Plotted_Chart") <br>
-*Sample look of a visualized CSV file uploaded to the application*
+*Sample look of a visualized CSV file uploaded to the application.*
 <br>
 
 ## Installation
