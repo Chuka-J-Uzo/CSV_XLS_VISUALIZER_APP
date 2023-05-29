@@ -1,21 +1,25 @@
 # Chart Generator
 
-Chart Generator is a web application that allows you to generate interactive charts from CSV or XLSX files. It uses the Chart.js library to create various types of charts such as line charts, bar charts, scatter plots, and bubble charts. The application provides a user-friendly interface to select the data, choose chart options, and generate the chart with customizable settings.
+Chart Generator is a web application that allows you to generate interactive charts from CSV or XLSX files. It is designed to assist individuals who need to quickly analyze data but lack access to more advanced and sophisticated tools. It uses the Chart.js library to create various types of charts such as line charts, bar charts, scatter plots, and bubble charts. The application provides a user-friendly interface to select the data, choose chart options, and generate the chart with customizable settings.
 
 ![Application_UI](./img_assets/Application_UI.png "Application_UI") <br>
 *Web Interface of the application with different customizations*
 <br>
 
+With Chart Generator, users can easily generate various types of charts, such as line charts, bar charts, scatter plots, and bubble charts, based on their data input.
+
+The application simplifies the process of visualizing and interpreting data, enabling users to gain valuable insights without the need for complex software or technical expertise. By offering a user-friendly interface and intuitive controls, Chart Generator empowers users to create meaningful visual representations of their data in just a few simple steps.
+
 ## Features
 
-- Supports CSV and XLSX file formats for data input.
+- Data Import: Supports CSV and XLSX file formats for data input. Users can upload CSV or Excel files to import their data seamlessly.
 - Multiple chart types to choose from: line chart, bar chart, scatter plot, and bubble chart.
 - Select dependent variables (y-axis) and an independent variable (x-axis) from the dataset.
 - Customize chart title, x-axis label, and y-axis label.
 - Adjust line thickness and dot size for line charts and scatter plots.
 - Enable or disable animation for chart rendering.
 - Generate interactive charts with zoom and pan functionality.
-- Save the generated chart as PNG, JPEG, or SVG format.
+- Export Options: Generated charts can be saved in various formats, including PNG, JPEG, and SVG, for easy sharing and further analysis.
 
 ![Plotted_Chart](./img_assets/Plotted_chart_sample.png "Plotted_Chart") <br>
 *Sample look of a visualized CSV file uploaded to the application.*
